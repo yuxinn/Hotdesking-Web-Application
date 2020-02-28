@@ -1,28 +1,42 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Sidebar v-if="currentRouteName!='login'"></Sidebar>
+    <router-view v-else></router-view>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Sidebar from './pages/Sidebar'
 
 export default {
-  name: 'App',
+  name: 'app',
   components: {
-    HelloWorld
+    Sidebar
+  },
+  data() {
+    return {
+      collapsed: false,
+    };
+  },
+  computed: {
+    currentRouteName() {
+      return this.$route.name;
+    }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+  #components-layout-demo-side .logo {
+    /* height: 100px; */
+    /* background: rgba(104, 119, 158, 0.733); */
+    margin: 16px;
+  }
+  .logo-img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    height: auto;
+  }
 </style>
