@@ -12,6 +12,7 @@ export const router = new Router({
   hash: false,
   routes: [
     { path: '/login', component: Login, name: 'login' },
+    { path: '/dashboard', component: Dashboard, name: 'dashboard' },
     { path: '/', component: Dashboard, name: 'dashboard' },
     
   ]
