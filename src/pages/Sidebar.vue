@@ -6,15 +6,15 @@
     </div>
     <a-menu @click="handleClick" theme="dark" :defaultSelectedKeys="['dashboard']" mode="inline">
       <a-menu-item key="dashboard">
-        <a-icon type="desktop" />
+        <a-icon class="sidebar-icon" type="desktop" />
         <span>Dashboard</span>
       </a-menu-item>
       <a-menu-item key="booking">
-        <a-icon type="file" />
+        <a-icon class="sidebar-icon" type="file" />
         <span>Bookings</span>
       </a-menu-item>
       <a-menu-item key="user">
-        <a-icon type="user" />
+        <a-icon class="sidebar-icon" type="user" />
         <span>User Management</span>
       </a-menu-item>
       <a-menu-item key="login" class="mt-5">
@@ -57,7 +57,6 @@
 
 <style scoped>
   .sidebar-icon {
-    color: red;
     vertical-align: 1px;
   }
 </style>
