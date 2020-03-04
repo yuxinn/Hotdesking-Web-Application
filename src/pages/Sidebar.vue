@@ -18,7 +18,7 @@
         <span>User Management</span>
       </a-menu-item>
       <a-menu-item key="login" class="mt-5">
-        <a-icon type="poweroff" />
+        <a-icon class="sidebar-icon" type="poweroff" />
         <span>Log Out</span>
       </a-menu-item>
     </a-menu>
@@ -54,3 +54,10 @@
     },
   };
 </script>
+
+<style scoped>
+  .sidebar-icon {
+    color: red;
+    vertical-align: 1px;
+  }
+</style>

@@ -20,3 +20,12 @@ export async function createTable(data) {
   let response = await axios(options)
   return response.data
 }
+
+export async function bookTable(tableid) {
+  const options = {
+    method: 'get',
+    url: base_url + `/api/table/${tableid}/book`,
+  }
+  let response = await axios(options)
+  return response.data
+}
