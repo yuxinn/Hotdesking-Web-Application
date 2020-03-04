@@ -1,13 +1,31 @@
 <template>
   <div class="Dashboard mb-4">
-    <p class="h4 mb-3">Hot Desk Summary</p>
-    <div class="d-flex justify-content-end mb-3">
+
+    <div class="d-flex justify-content-between mb-3">
+      <p class="h4 mb-3">Hot Desk Summary</p>
       <a-spin v-if="fetching" size="small" />
       <a-tag v-else class="mr-0 pl-0" style="cursor: default;">
         <a-icon type="check-circle" style="vertical-align: 1px;" class="mx-2"/>
         Last Updated: {{time.format("MMMM Do YYYY, HH:mm:ss")}}
       </a-tag>
     </div>
+
+    <div class="d-flex justify-content-between mb-3" >
+      <a-button type="default" @click="showModal">
+        <a-icon type="plus-circle" style="vertical-align: 1px;"/>
+        Add Table
+      </a-button>
+      <div>
+        <a-tag class="availablelegend">Available</a-tag>
+        <a-tag class="bookedlegend">Booked</a-tag>
+        <a-tag class="takenlegend">Taken</a-tag>
+        <a-tag class="awaylegend">Away</a-tag>
+        <a-tag class="hogginglegend  mr-0">Hogging</a-tag>
+      </div>
+    </div>
+
+    <AddTable v-if="visibleModal" :visibleModal="visibleModal" @close="closeModal" @submit="submitNew"></AddTable>
+
     <div style="background-color: #ececec; padding: 20px;">
       <a-list itemLayout="horizontal" :dataSource="clusters" :loading="firstload">
         <a-list-item slot="renderItem" slot-scope="cluster">
@@ -44,20 +62,27 @@
       </a-list>
 
     </div>
+
+
   </div>
 </template>
 
 <script>
 import { getTables, createTable, bookTable } from "../../api"
 import moment from 'moment'
+import AddTable from "../../components/AddTable"
 
 export default {
+  components: {
+    AddTable
+  },
   data() {
     return {
       tables: {},
       firstload: true,
       fetching: true,
-      time: moment()
+      time: moment(),
+      visibleModal: false,
     }
   },
   mounted(){
@@ -82,8 +107,7 @@ export default {
         this.firstload = false
       }
     },
-    async createTable() {
-      var data = { tableId: this.tableId, status: this.status }
+    async createTable(data) {
       var resp = await createTable(data)
       console.log(resp)
     },
@@ -118,7 +142,17 @@ export default {
         return `${hogger} Hogged Seat `
       }
       return 'Not Available'
-    }
+    },
+    showModal() {
+      this.visibleModal = true
+    },
+    closeModal() {
+      this.visibleModal = false
+    },
+    submitNew(data) {
+      this.visibleModal = false
+      this.createTable(data)
+    },
   },
   computed: {
     clusters() {
@@ -160,6 +194,31 @@ export default {
   }
   .hoggingtext {
     color: rgb(251, 155, 29);
+  }
+  .availablelegend {
+    background: #63C3A7;
+    color: #fff;
+    border: None;
+  }
+  .bookedlegend {
+    background: rgb(118, 194, 230);
+    color: #fff;
+    border: None;
+  }
+  .takenlegend {
+    background: rgb(211, 8, 75);
+    color: #fff;
+    border: None;
+  }
+  .awaylegend {
+    background: rgb(255, 209, 82);
+    color: #fff;
+    border: None;
+  }
+  .hogginglegend {
+    background: rgb(251, 129, 29);
+    color: #fff;
+    border: None;
   }
   .circle {
     width: 25px;
