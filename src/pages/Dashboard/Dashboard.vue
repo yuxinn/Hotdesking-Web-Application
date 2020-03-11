@@ -63,18 +63,48 @@
 
     </div>
 
+    <br>
+    
+    <a-card :loading="summaryLoading">
+      <div class="d-flex justify-content-between mb-3" >
+        <p class="h4 mb-3">Past Occupancy</p>
+        <a-dropdown>
+          <a-menu slot="overlay" @click="handleSummaryClick">
+            <a-menu-item v-for="range in summaryRanges" :key="range">{{range}} Days</a-menu-item>
+          </a-menu>
+          <a-button style="margin-left: 8px"> {{summaryRange}} Days <a-icon type="down" /> </a-button>
+        </a-dropdown>
+      </div>
+      <ejs-chart id="chartContainer" :primaryXAxis='primaryXAxis' :tooltip="tooltip">
+        <e-series-collection>
+          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='available' tooltipMappingName='availableA' name='available' :fill='availableFill'> </e-series>
+          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='away' tooltipMappingName='awayA' name='away'  :fill='awayFill'> </e-series>
+          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='booked' tooltipMappingName='bookedA' name='booked'  :fill='bookedFill'> </e-series>
+          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='hogging' tooltipMappingName='hoggingA' name='hogging'  :fill='hoggingFill'> </e-series>
+          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='taken' tooltipMappingName='takenA' name='taken'  :fill='takenFill'> </e-series>
+          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='total' name='total'> </e-series>
+        </e-series-collection>
+      </ejs-chart>
+    </a-card>
 
   </div>
 </template>
 
 <script>
-import { getTables, createTable, bookTable } from "../../api"
+import Vue from "vue";
+import { getTables, getTableSummary, createTable, bookTable } from "../../api"
 import moment from 'moment'
 import AddTable from "../../components/AddTable"
+import { ChartPlugin, StackingBarSeries, Category, Tooltip } from "@syncfusion/ej2-vue-charts";
+
+Vue.use(ChartPlugin);
 
 export default {
+  provide: {
+    chart: [StackingBarSeries, Category, Tooltip ]
+  },
   components: {
-    AddTable
+    AddTable,
   },
   data() {
     return {
@@ -83,10 +113,28 @@ export default {
       fetching: true,
       time: moment(),
       visibleModal: false,
+      // summary
+      summaryLoading: true,
+      summaryRange: 7,
+      summaryRanges: [7, 30, 90],
+      seriesData:[],
+      availableFill: '#63C3A7',
+      awayFill: 'rgb(255, 209, 82)',
+      bookedFill: 'rgb(118, 194, 230)',
+      hoggingFill: 'rgb(251, 129, 29)',
+      takenFill: 'rgb(211, 8, 75)',
+      primaryXAxis: {
+        valueType: 'Category',
+      },
+      tooltip: { 
+        enable: true,
+        format: '${point.tooltip}'
+      },
     }
   },
   mounted(){
     this.getTables()
+    this.getTableSummary({ range: 7 })
   },
   created() {
     this.interval = setInterval(() => {
@@ -107,9 +155,42 @@ export default {
         this.firstload = false
       }
     },
+    async getTableSummary(params) {
+      try {
+        this.summaryLoading = true
+        var resp = await getTableSummary(params)
+        var seriesData = []
+        for (var key in resp) {
+          var total = resp[key]['total']
+          var data = {
+            date: key,
+            available: resp[key]['available'] / total,
+            availableA: resp[key]['available'],
+            away: resp[key]['away'] / total,
+            awayA: resp[key]['away'],
+            booked: resp[key]['booked'] / total,
+            bookedA: resp[key]['booked'],
+            hogging: resp[key]['hogging'] / total,
+            hoggingA: resp[key]['hogging'],
+            taken: resp[key]['taken'] / total,
+            takenA: resp[key]['taken'],
+          }
+          seriesData.push(data)
+        }
+        this.seriesData = seriesData
+      } catch {
+        this.$message.error(`Error retrieving occupancy summary.`);
+      } finally {
+        this.summaryLoading = false
+      }
+    },
     async createTable(data) {
-      var resp = await createTable(data)
-      console.log(resp)
+      try {
+        await createTable(data)
+        this.$message.success(`${data.tableId.toUpperCase()} added successfully.`);
+      } catch(err) {
+        console.error(err)
+      }
     },
     async bookTable(cluster, id) {
       try {
@@ -153,11 +234,15 @@ export default {
       this.visibleModal = false
       this.createTable(data)
     },
+    handleSummaryClick(e) {
+      this.summaryRange = e.key
+      this.getTableSummary({ range: e.key })
+    },
   },
   computed: {
     clusters() {
       return Object.keys(this.tables) || []
-    }
+    },
   }
 }
 </script>
@@ -233,5 +318,8 @@ export default {
   }
   .book-btn:focus {
   outline: none;
+  }
+  #chartContainer {
+    height: 300px;
   }
 </style>
