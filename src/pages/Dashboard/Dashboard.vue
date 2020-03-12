@@ -63,29 +63,42 @@
 
     </div>
 
-    <br>
+    <a-divider></a-divider>
+
+    <div class="d-flex justify-content-between mb-3">
+      <p class="h4 mb-3">Past Statistics</p>
+      <a-dropdown>
+        <a-menu slot="overlay" @click="handleSummaryClick">
+          <a-menu-item v-for="range in occupancyRanges" :key="range">{{range}} Days</a-menu-item>
+        </a-menu>
+        <a-button style="margin-left: 8px"> {{occupancyRange}} Days <a-icon type="down" /> </a-button>
+      </a-dropdown>
+    </div>
+
+    <a-row :gutter="16">
+      <a-col :md="24" :lg="12">
+        <a-card :loading="occupancyLoading">
+          <p class="h5 mb-3 text-center">Occupancy</p>
+          <ejs-chart id="chartContainer" :primaryXAxis='primaryXAxis' :tooltip="tooltip" :title="occupancyTitle">
+            <e-series-collection>
+              <e-series :dataSource='occupancyData' type='StackingBar100' xName='date' yName='available' tooltipMappingName='availableA' name='available' :fill='availableFill'> </e-series>
+              <e-series :dataSource='occupancyData' type='StackingBar100' xName='date' yName='occupied' tooltipMappingName='occupiedA' name='occupied'  :fill='takenFill'> </e-series>
+            </e-series-collection>
+          </ejs-chart>
+        </a-card>
+      </a-col>
+      <a-col :xs="24" :lg="12">
+        <a-card :loading="occupancyLoading">
+          <p class="h5 mb-3 text-center">Hours Hogged</p>
+          <ejs-chart id="chartContainer1" :primaryXAxis='primaryXAxis' :tooltip="tooltip" :title="hoggingTitle">
+            <e-series-collection>
+              <e-series :dataSource='hoggingData' type='StackingBar' xName='date' yName='hoggedHours' tooltipMappingName='hoggedHoursA' name='hoggedHours' :fill='hoggingFill'> </e-series>
+            </e-series-collection>
+          </ejs-chart>
+        </a-card>
+      </a-col>
+    </a-row>
     
-    <a-card :loading="summaryLoading">
-      <div class="d-flex justify-content-between mb-3" >
-        <p class="h4 mb-3">Past Occupancy</p>
-        <a-dropdown>
-          <a-menu slot="overlay" @click="handleSummaryClick">
-            <a-menu-item v-for="range in summaryRanges" :key="range">{{range}} Days</a-menu-item>
-          </a-menu>
-          <a-button style="margin-left: 8px"> {{summaryRange}} Days <a-icon type="down" /> </a-button>
-        </a-dropdown>
-      </div>
-      <ejs-chart id="chartContainer" :primaryXAxis='primaryXAxis' :tooltip="tooltip">
-        <e-series-collection>
-          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='available' tooltipMappingName='availableA' name='available' :fill='availableFill'> </e-series>
-          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='away' tooltipMappingName='awayA' name='away'  :fill='awayFill'> </e-series>
-          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='booked' tooltipMappingName='bookedA' name='booked'  :fill='bookedFill'> </e-series>
-          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='hogging' tooltipMappingName='hoggingA' name='hogging'  :fill='hoggingFill'> </e-series>
-          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='taken' tooltipMappingName='takenA' name='taken'  :fill='takenFill'> </e-series>
-          <e-series :dataSource='seriesData' type='StackingBar100' xName='date' yName='total' name='total'> </e-series>
-        </e-series-collection>
-      </ejs-chart>
-    </a-card>
 
   </div>
 </template>
@@ -113,15 +126,12 @@ export default {
       fetching: true,
       time: moment(),
       visibleModal: false,
-      // summary
-      summaryLoading: true,
-      summaryRange: 7,
-      summaryRanges: [7, 30, 90],
-      seriesData:[],
+      // occupancy
+      occupancyLoading: true,
+      occupancyRange: 7,
+      occupancyRanges: [7, 30, 90],
+      occupancyData: [],
       availableFill: '#63C3A7',
-      awayFill: 'rgb(255, 209, 82)',
-      bookedFill: 'rgb(118, 194, 230)',
-      hoggingFill: 'rgb(251, 129, 29)',
       takenFill: 'rgb(211, 8, 75)',
       primaryXAxis: {
         valueType: 'Category',
@@ -130,6 +140,12 @@ export default {
         enable: true,
         format: '${point.tooltip}'
       },
+      avgOcc: 0,
+      // hogging
+      hoggingLoading: true,
+      hoggingData: [],
+      hoggingFill: 'rgb(251, 129, 29)',
+      totalHog: 0
     }
   },
   mounted(){
@@ -157,31 +173,45 @@ export default {
     },
     async getTableSummary(params) {
       try {
-        this.summaryLoading = true
+        this.occupancyLoading = true
+        this.hoggingLoading = true
         var resp = await getTableSummary(params)
-        var seriesData = []
+        var occupancyData = []
+        var hoggingData = []
+        var totalOcc = 0
+        var totalValid = 0
+        var totalHog = 0
         for (var key in resp) {
           var total = resp[key]['total']
-          var data = {
+          if (total > 0) {
+            totalOcc += (resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken']) / total
+            totalValid += 1
+          }
+          totalHog += resp[key]['hoggedHours']
+          var sumObj = {
             date: key,
             available: resp[key]['available'] / total,
-            availableA: resp[key]['available'],
-            away: resp[key]['away'] / total,
-            awayA: resp[key]['away'],
-            booked: resp[key]['booked'] / total,
-            bookedA: resp[key]['booked'],
-            hogging: resp[key]['hogging'] / total,
-            hoggingA: resp[key]['hogging'],
-            taken: resp[key]['taken'] / total,
-            takenA: resp[key]['taken'],
+            availableA: resp[key]['available'] + ' seats',
+            occupied: resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken'],
+            occupiedA: resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken']  + ' seats',
           }
-          seriesData.push(data)
+          var hogObj = {
+            date: key,
+            hoggedHours: resp[key]['hoggedHours'],
+            hoggedHoursA: resp[key]['hoggedHours'] + ' hours',
+          }
+          occupancyData.push(sumObj)
+          hoggingData.push(hogObj)
         }
-        this.seriesData = seriesData
+        this.occupancyData = occupancyData
+        this.avgOcc = totalOcc / totalValid
+        this.hoggingData = hoggingData
+        this.totalHog = totalHog
       } catch {
-        this.$message.error(`Error retrieving occupancy summary.`);
+        this.$message.error(`Error retrieving occupancy occupancy.`);
       } finally {
-        this.summaryLoading = false
+        this.occupancyLoading = false
+        this.hoggingLoading = false
       }
     },
     async createTable(data) {
@@ -235,13 +265,19 @@ export default {
       this.createTable(data)
     },
     handleSummaryClick(e) {
-      this.summaryRange = e.key
+      this.occupancyRange = e.key
       this.getTableSummary({ range: e.key })
     },
   },
   computed: {
     clusters() {
       return Object.keys(this.tables) || []
+    },
+    occupancyTitle() {
+      return this.avgOcc.toFixed(2) + '% occupied over ' + this.occupancyRange + ' days' 
+    },
+    hoggingTitle() {
+      return 'Total of ' + this.totalHog.toFixed(2) + ' hours hogged over ' + this.occupancyRange + ' days' 
     },
   }
 }
@@ -320,6 +356,9 @@ export default {
   outline: none;
   }
   #chartContainer {
+    height: 300px;
+  }
+  #chartContainer1 {
     height: 300px;
   }
 </style>
