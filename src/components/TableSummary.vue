@@ -27,10 +27,10 @@
         <a-card :loading="occupancyLoading">
           <p class="h5 mb-3 text-center">Hogging
           <a-dropdown>
+            <a class="ant-dropdown-link" href="#"> {{hoggingType}} <a-icon type="down" /> </a>
             <a-menu slot="overlay" @click="handleHogClick">
               <a-menu-item v-for="hogType in hoggingTypes" :key="hogType">{{hogType}}</a-menu-item>
             </a-menu>
-            <a-button style="margin-left: 8px"> {{hoggingType}} <a-icon type="down" /> </a-button>
           </a-dropdown></p>
           <ejs-chart id="hogContainer" :primaryXAxis='primaryXAxis' :tooltip="tooltip" :title="hoggingTitle">
             <e-series-collection>
@@ -96,11 +96,12 @@ export default {
       var hoggingData = []
       var totalHog = 0
       for (var key in resp) {
-        totalHog += perSeat ? resp[key]['hoggedHours'] / totalSeats : resp[key]['hoggedHours']
+        var hoggedHours = resp[key]['hoggedHours']
+        totalHog += perSeat ? hoggedHours / totalSeats : hoggedHours
         var hogObj = {
           date: key,
-          hogged: perSeat ? resp[key]['hoggedHours'] / totalSeats : resp[key]['hoggedHours'],
-          hoggedA: (perSeat ? resp[key]['hoggedHours'] / totalSeats : resp[key]['hoggedHours']) + ' hours',
+          hogged: perSeat ? hoggedHours / totalSeats : hoggedHours,
+          hoggedA: (perSeat ? hoggedHours / totalSeats : hoggedHours.toFixed(2)) + ' hours',
         }
         hoggingData.push(hogObj)
       }
@@ -120,12 +121,16 @@ export default {
           var total = resp[key]['total']
           occ += (resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken'])
           totalOcc += total
+          var available = resp[key]['available']
+          var apercent = available / total
+          var occupied = (resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken'])
+          var opercent = occupied / total
           var sumObj = {
             date: key,
-            available: resp[key]['available'] / total,
-            availableA: resp[key]['available'] + ' seats',
-            occupied: (resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken']) / total,
-            occupiedA: resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken']  + ' seats',
+            available: apercent,
+            availableA: available + ' seats (' + (apercent*100).toFixed(2) + '%)',
+            occupied: opercent,
+            occupiedA: occupied + ' seats (' + (opercent*100).toFixed(2) + '%)',
           }
           occupancyData.push(sumObj)
         }
@@ -153,7 +158,7 @@ export default {
       return this.avgOcc.toFixed(2)*100 + '% of seats occupied'
     },
     hoggingTitle() {
-      return 'Avg ' + this.totalHog.toFixed(1) + ' hours of hogging ' + this.hoggingType
+      return 'Avg ' + this.totalHog.toFixed(1) + ' hours of daily hogging '
     },
   }
 };
