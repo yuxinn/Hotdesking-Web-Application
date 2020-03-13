@@ -65,59 +65,21 @@
 
     <a-divider></a-divider>
 
-    <div class="d-flex justify-content-between mb-3">
-      <p class="h4 mb-3">Past Statistics</p>
-      <a-dropdown>
-        <a-menu slot="overlay" @click="handleSummaryClick">
-          <a-menu-item v-for="range in occupancyRanges" :key="range">{{range}} Days</a-menu-item>
-        </a-menu>
-        <a-button style="margin-left: 8px"> {{occupancyRange}} Days <a-icon type="down" /> </a-button>
-      </a-dropdown>
-    </div>
-
-    <a-row :gutter="16">
-      <a-col :md="24" :lg="12">
-        <a-card :loading="occupancyLoading">
-          <p class="h5 mb-3 text-center">Occupancy</p>
-          <ejs-chart id="chartContainer" :primaryXAxis='primaryXAxis' :tooltip="tooltip" :title="occupancyTitle">
-            <e-series-collection>
-              <e-series :dataSource='occupancyData' type='StackingBar100' xName='date' yName='available' tooltipMappingName='availableA' name='available' :fill='availableFill'> </e-series>
-              <e-series :dataSource='occupancyData' type='StackingBar100' xName='date' yName='occupied' tooltipMappingName='occupiedA' name='occupied'  :fill='takenFill'> </e-series>
-            </e-series-collection>
-          </ejs-chart>
-        </a-card>
-      </a-col>
-      <a-col :xs="24" :lg="12">
-        <a-card :loading="occupancyLoading">
-          <p class="h5 mb-3 text-center">Hours Hogged</p>
-          <ejs-chart id="chartContainer1" :primaryXAxis='primaryXAxis' :tooltip="tooltip" :title="hoggingTitle">
-            <e-series-collection>
-              <e-series :dataSource='hoggingData' type='StackingBar' xName='date' yName='hoggedHours' tooltipMappingName='hoggedHoursA' name='hoggedHours' :fill='hoggingFill'> </e-series>
-            </e-series-collection>
-          </ejs-chart>
-        </a-card>
-      </a-col>
-    </a-row>
-    
+    <TableSummary :tables="tables" :clusters="clusters"></TableSummary>
 
   </div>
 </template>
 
 <script>
-import Vue from "vue";
-import { getTables, getTableSummary, createTable, bookTable } from "../../api"
+import { getTables, createTable, bookTable } from "../../api"
 import moment from 'moment'
 import AddTable from "../../components/AddTable"
-import { ChartPlugin, StackingBarSeries, Category, Tooltip } from "@syncfusion/ej2-vue-charts";
-
-Vue.use(ChartPlugin);
+import TableSummary from "../../components/TableSummary"
 
 export default {
-  provide: {
-    chart: [StackingBarSeries, Category, Tooltip ]
-  },
   components: {
     AddTable,
+    TableSummary
   },
   data() {
     return {
@@ -126,31 +88,10 @@ export default {
       fetching: true,
       time: moment(),
       visibleModal: false,
-      // occupancy
-      occupancyLoading: true,
-      occupancyRange: 7,
-      occupancyRanges: [7, 30, 90],
-      occupancyData: [],
-      availableFill: '#63C3A7',
-      takenFill: 'rgb(211, 8, 75)',
-      primaryXAxis: {
-        valueType: 'Category',
-      },
-      tooltip: { 
-        enable: true,
-        format: '${point.tooltip}'
-      },
-      avgOcc: 0,
-      // hogging
-      hoggingLoading: true,
-      hoggingData: [],
-      hoggingFill: 'rgb(251, 129, 29)',
-      totalHog: 0
     }
   },
   mounted(){
     this.getTables()
-    this.getTableSummary({ range: 7 })
   },
   created() {
     this.interval = setInterval(() => {
@@ -169,49 +110,6 @@ export default {
       } finally {
         this.fetching = false
         this.firstload = false
-      }
-    },
-    async getTableSummary(params) {
-      try {
-        this.occupancyLoading = true
-        this.hoggingLoading = true
-        var resp = await getTableSummary(params)
-        var occupancyData = []
-        var hoggingData = []
-        var totalOcc = 0
-        var totalValid = 0
-        var totalHog = 0
-        for (var key in resp) {
-          var total = resp[key]['total']
-          if (total > 0) {
-            totalOcc += (resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken']) / total
-            totalValid += 1
-          }
-          totalHog += resp[key]['hoggedHours']
-          var sumObj = {
-            date: key,
-            available: resp[key]['available'] / total,
-            availableA: resp[key]['available'] + ' seats',
-            occupied: resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken'],
-            occupiedA: resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken']  + ' seats',
-          }
-          var hogObj = {
-            date: key,
-            hoggedHours: resp[key]['hoggedHours'],
-            hoggedHoursA: resp[key]['hoggedHours'] + ' hours',
-          }
-          occupancyData.push(sumObj)
-          hoggingData.push(hogObj)
-        }
-        this.occupancyData = occupancyData
-        this.avgOcc = totalOcc / totalValid
-        this.hoggingData = hoggingData
-        this.totalHog = totalHog
-      } catch {
-        this.$message.error(`Error retrieving occupancy occupancy.`);
-      } finally {
-        this.occupancyLoading = false
-        this.hoggingLoading = false
       }
     },
     async createTable(data) {
@@ -264,20 +162,10 @@ export default {
       this.visibleModal = false
       this.createTable(data)
     },
-    handleSummaryClick(e) {
-      this.occupancyRange = e.key
-      this.getTableSummary({ range: e.key })
-    },
   },
   computed: {
     clusters() {
       return Object.keys(this.tables) || []
-    },
-    occupancyTitle() {
-      return this.avgOcc.toFixed(2) + '% occupied over ' + this.occupancyRange + ' days' 
-    },
-    hoggingTitle() {
-      return 'Total of ' + this.totalHog.toFixed(2) + ' hours hogged over ' + this.occupancyRange + ' days' 
     },
   }
 }
