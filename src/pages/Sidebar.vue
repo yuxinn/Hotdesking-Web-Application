@@ -2,7 +2,7 @@
   <a-layout id="components-layout-demo-side" style="min-height: 100vh">
   <a-layout-sider collapsible v-model="collapsed">
     <div class="logo"> 
-      <img src="../assets/logo.png" class="logo-img" />
+      <img src="../assets/bee.png" class="logo-img" />
     </div>
     <a-menu @click="handleClick" theme="dark" :defaultSelectedKeys="['dashboard']" mode="inline">
       <a-menu-item key="dashboard">

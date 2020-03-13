@@ -15,7 +15,7 @@
       <a-col :md="24" :lg="12">
         <a-card :loading="occupancyLoading">
           <p class="h5 mb-3 text-center">Occupancy</p>
-          <ejs-chart id="chartContainer" :primaryXAxis='primaryXAxis' :tooltip="tooltip" :title="occupancyTitle">
+          <ejs-chart id="occContainer" :primaryXAxis='primaryXAxis' :tooltip="tooltip" :title="occupancyTitle">
             <e-series-collection>
               <e-series :dataSource='occupancyData' type='StackingBar100' xName='date' yName='available' tooltipMappingName='availableA' name='available' :fill='availableFill'> </e-series>
               <e-series :dataSource='occupancyData' type='StackingBar100' xName='date' yName='occupied' tooltipMappingName='occupiedA' name='occupied'  :fill='takenFill'> </e-series>
@@ -32,7 +32,7 @@
             </a-menu>
             <a-button style="margin-left: 8px"> {{hoggingType}} <a-icon type="down" /> </a-button>
           </a-dropdown></p>
-          <ejs-chart id="chartContainer1" :primaryXAxis='primaryXAxis' :tooltip="tooltip" :title="hoggingTitle">
+          <ejs-chart id="hogContainer" :primaryXAxis='primaryXAxis' :tooltip="tooltip" :title="hoggingTitle">
             <e-series-collection>
               <e-series :dataSource='hoggingData' type='StackingBar' xName='date' yName='hogged' tooltipMappingName='hoggedA' name='hogged' :fill='hoggingFill'> </e-series>
             </e-series-collection>
@@ -140,6 +140,7 @@ export default {
       }
     },
     handleSummaryClick(e) {
+      this.occupancyRange = e.key
       this.getTableSummary({ range: e.key })
     },
     handleHogClick(e) {
@@ -157,3 +158,9 @@ export default {
   }
 };
 </script>
+
+<style>
+#occContainer, #hogContainer {
+  height: 250px
+}
+</style>

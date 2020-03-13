@@ -1,6 +1,5 @@
 <template>
   <div class="Dashboard mb-4">
-
     <div class="d-flex justify-content-between mb-3">
       <p class="h4 mb-3">Hot Desk Summary</p>
       <a-spin v-if="fetching" size="small" />
@@ -16,52 +15,59 @@
         Add Table
       </a-button>
       <div>
-        <a-tag class="availablelegend">Available</a-tag>
-        <a-tag class="bookedlegend">Booked</a-tag>
-        <a-tag class="takenlegend">Taken</a-tag>
-        <a-tag class="awaylegend">Away</a-tag>
-        <a-tag class="hogginglegend  mr-0">Hogging</a-tag>
+        <a-tag class="available legend">Available</a-tag>
+        <a-tag class="booked legend">Booked</a-tag>
+        <a-tag class="taken legend">Taken</a-tag>
+        <a-tag class="away legend">Away</a-tag>
+        <a-tag class="hogging legend  mr-0">Hogging</a-tag>
       </div>
     </div>
 
     <AddTable v-if="visibleModal" :visibleModal="visibleModal" @close="closeModal" @submit="submitNew"></AddTable>
-
-    <div style="background-color: #ececec; padding: 20px;">
-      <a-list itemLayout="horizontal" :dataSource="clusters" :loading="firstload">
-        <a-list-item slot="renderItem" slot-scope="cluster">
-          <a-list-item-meta>
-            <div slot="title">{{cluster.toUpperCase()}}</div>
-            <div slot="description">
-              {{clusterStatus(tables[cluster])}}
-            </div>
-          </a-list-item-meta>
-          <div class="content">
-            <div class="tables row">
-              <div class="col-auto mr-3" v-for="{tableId, status} in tables[cluster]" :key="tableId">
-                <div class="row d-flex justify-content-center">
-                  <div :class="'circle ' + status">
-                    <a-popconfirm
-                      v-if="status=='available'"
-                      placement="topRight"
-                      :title="`Book ${tableId.toUpperCase()}?`"
-                      okText="Book"
-                      @confirm="() => bookTable(cluster, tableId)"
-                    >
-                      <a-icon slot="icon" type="tag" style="color: dimgray" />
-                      <button class="book-btn" href="javascript:;" ></button>
-                    </a-popconfirm>
+    
+    <a-row :gutter="16">
+      <!-- <a-col class="gutter-row" :span="6">
+        <div class="gutter-box">pie chart on current occupancy</div>
+      </a-col> -->
+      <!-- <a-col class="gutter-row" :span="18"> -->
+        <div class="gutter-box" style="background-color: #ececec; padding: 20px;">
+          <a-list itemLayout="horizontal" :dataSource="clusters" :loading="firstload">
+            <a-list-item slot="renderItem" slot-scope="cluster">
+              <a-list-item-meta>
+                <div slot="title">{{cluster.toUpperCase()}}</div>
+                <div slot="description">
+                  {{clusterStatus(tables[cluster])}}
+                </div>
+              </a-list-item-meta>
+              <div class="content">
+                <div class="tables row">
+                  <div class="col-auto mr-3" v-for="{tableId, status} in tables[cluster]" :key="tableId">
+                    <div class="row d-flex justify-content-center">
+                        <a-tooltip placement="topLeft">
+                          <template slot="title">
+                            {{status}}
+                          </template><div :class="'circle ' + status" @click="showTableModal(tableId, status, cluster)"></div>
+                        </a-tooltip>
+                    </div>
+                    <div class="row">
+                      {{tableId.toUpperCase()}}
+                    </div>
                   </div>
                 </div>
-                <div class="row">
-                  {{tableId.toUpperCase()}}
-                </div>
               </div>
-            </div>
-          </div>
-        </a-list-item>
-      </a-list>
+            </a-list-item>
+          </a-list>
+        </div>
+      <!-- </a-col> -->
+    </a-row>
 
-    </div>
+    <TableInfo 
+      v-if="showTableInfo"
+      :table="selectedTable"
+      :showTableInfo="showTableInfo"
+      :bookTable="bookTable"
+      @close="showTableModal"
+    ></TableInfo>
 
     <a-divider></a-divider>
 
@@ -74,12 +80,14 @@
 import { getTables, createTable, bookTable } from "../../api"
 import moment from 'moment'
 import AddTable from "../../components/AddTable"
+import TableInfo from "./TableInfo"
 import TableSummary from "../../components/TableSummary"
 
 export default {
   components: {
     AddTable,
-    TableSummary
+    TableSummary,
+    TableInfo,
   },
   data() {
     return {
@@ -87,6 +95,11 @@ export default {
       firstload: true,
       fetching: true,
       time: moment(),
+
+      selectedTable: {},
+      showTableInfo: false,
+
+
       visibleModal: false,
     }
   },
@@ -96,7 +109,7 @@ export default {
   created() {
     this.interval = setInterval(() => {
       this.getTables()
-    }, 7000);
+    }, 10000);
   },
   methods: {
     async getTables() {
@@ -111,6 +124,12 @@ export default {
         this.fetching = false
         this.firstload = false
       }
+    },
+    showTableModal(tableId, status, cluster) {
+      this.selectedTable.tableId = tableId
+      this.selectedTable.status = status
+      this.selectedTable.cluster = cluster
+      this.showTableInfo = !this.showTableInfo
     },
     async createTable(data) {
       try {
@@ -174,11 +193,9 @@ export default {
 <style scoped>
   .table { 
     font-size: 30px;
-    
   }
   .available {
     background: #63C3A7;
-    cursor: pointer;
   }
   .booked {
     background: rgb(118, 194, 230);
@@ -192,47 +209,15 @@ export default {
   .hogging {
     background: rgb(251, 129, 29);
   }
-  .availabletext {
-    color: #63C3A7;
-  }
-  .bookedtext {
-    color: rgb(118, 194, 230);
-  }
-  .takentext {
-    color: rgb(211, 8, 75);
-  }
-  .hoggingtext {
-    color: rgb(251, 155, 29);
-  }
-  .availablelegend {
-    background: #63C3A7;
+  .legend {
     color: #fff;
-    border: None;
-  }
-  .bookedlegend {
-    background: rgb(118, 194, 230);
-    color: #fff;
-    border: None;
-  }
-  .takenlegend {
-    background: rgb(211, 8, 75);
-    color: #fff;
-    border: None;
-  }
-  .awaylegend {
-    background: rgb(255, 209, 82);
-    color: #fff;
-    border: None;
-  }
-  .hogginglegend {
-    background: rgb(251, 129, 29);
-    color: #fff;
-    border: None;
+    border: none;
   }
   .circle {
     width: 25px;
     height: 25px;
     border-radius: 50%;
+    cursor: pointer;
   }
   .book-btn {
     border: none;
@@ -241,7 +226,7 @@ export default {
     width: 25px;
   }
   .book-btn:focus {
-  outline: none;
+    outline: none;
   }
   #chartContainer {
     height: 300px;
