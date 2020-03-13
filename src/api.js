@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const base_url = "http://iothotdesk.tk"
+const base_url = process.env.VUE_APP_API_BASE_URL
 
 export async function getTables() {
   const options = {

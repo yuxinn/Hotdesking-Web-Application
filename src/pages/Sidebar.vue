@@ -9,14 +9,14 @@
         <a-icon class="sidebar-icon" type="desktop" />
         <span>Dashboard</span>
       </a-menu-item>
-      <a-menu-item key="booking">
+      <!-- <a-menu-item key="booking">
         <a-icon class="sidebar-icon" type="file" />
         <span>Bookings</span>
       </a-menu-item>
       <a-menu-item key="user">
         <a-icon class="sidebar-icon" type="user" />
         <span>User Management</span>
-      </a-menu-item>
+      </a-menu-item> -->
       <a-menu-item key="login" class="mt-5">
         <a-icon class="sidebar-icon" type="poweroff" />
         <span>Log Out</span>

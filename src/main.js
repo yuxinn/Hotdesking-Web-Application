@@ -16,6 +16,12 @@ Vue.config.productionTip = false
 Vue.prototype.moment = moment
 Vue.prototype.$http = axios
 
+if (process.env.NODE_ENV === 'production') {
+  Vue.config.devtools = false;
+  Vue.config.debug = false;
+  Vue.config.silent = true; 
+}
+
 new Vue({
   router,
   render: h => h(App),
