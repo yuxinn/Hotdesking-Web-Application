@@ -26,10 +26,10 @@
     <AddTable v-if="visibleModal" :visibleModal="visibleModal" @close="closeModal" @submit="submitNew"></AddTable>
     
     <a-row :gutter="16">
-      <!-- <a-col class="gutter-row" :span="6">
+      <a-col class="gutter-row" :span="6">
         <div class="gutter-box">pie chart on current occupancy</div>
-      </a-col> -->
-      <!-- <a-col class="gutter-row" :span="18"> -->
+      </a-col>
+      <a-col class="gutter-row" :span="18">
         <div class="gutter-box" style="background-color: #ececec; padding: 20px;">
           <a-list itemLayout="horizontal" :dataSource="clusters" :loading="firstload">
             <a-list-item slot="renderItem" slot-scope="cluster">
@@ -58,7 +58,7 @@
             </a-list-item>
           </a-list>
         </div>
-      <!-- </a-col> -->
+      </a-col>
     </a-row>
 
     <TableInfo 
@@ -66,6 +66,7 @@
       :table="selectedTable"
       :showTableInfo="showTableInfo"
       :bookTable="bookTable"
+      :allSensors="sensors"
       @close="showTableModal"
     ></TableInfo>
 
@@ -77,7 +78,7 @@
 </template>
 
 <script>
-import { getTables, createTable, bookTable } from "../../api"
+import { getTables, getSensorHealth, createTable, bookTable } from "../../api"
 import moment from 'moment'
 import AddTable from "../../components/AddTable"
 import TableInfo from "./TableInfo"
@@ -99,12 +100,15 @@ export default {
       selectedTable: {},
       showTableInfo: false,
 
+      sensors: {},
+
 
       visibleModal: false,
     }
   },
   mounted(){
     this.getTables()
+    this.getSensorHealth()
   },
   created() {
     this.interval = setInterval(() => {
@@ -123,6 +127,14 @@ export default {
       } finally {
         this.fetching = false
         this.firstload = false
+      }
+    },
+    async getSensorHealth() {
+      try {
+        var resp = await getSensorHealth()
+        this.sensors = resp
+      } catch {
+        this.$message.error(`Error retrieving sensor health.`);
       }
     },
     showTableModal(tableId, status, cluster) {

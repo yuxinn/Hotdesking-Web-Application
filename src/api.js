@@ -11,6 +11,15 @@ export async function getTables() {
   return response.data
 }
 
+export async function getSensorHealth() {
+  const options = {
+    method: 'get',
+    url: base_url + '/api/tables/health'
+  }
+  let response = await axios(options)
+  return response.data
+}
+
 export async function getTableSummary(params) {
   const options = {
     method: 'get',
