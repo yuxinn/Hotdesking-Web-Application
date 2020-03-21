@@ -27,7 +27,7 @@
     
     <a-row :gutter="16">
       <a-col class="gutter-row" :span="6">
-        <div class="gutter-box">pie chart on current occupancy</div>
+        <div class="gutter-box"><Occupancy v-if="tables" :tables="tables"></Occupancy></div>
       </a-col>
       <a-col class="gutter-row" :span="18">
         <div class="gutter-box" style="background-color: #ececec; padding: 20px;">
@@ -82,6 +82,7 @@ import { getTables, getSensorHealth, createTable, bookTable } from "../../api"
 import moment from 'moment'
 import AddTable from "../../components/AddTable"
 import TableInfo from "./TableInfo"
+import Occupancy from "./CurrentOccupancy"
 import TableSummary from "../../components/TableSummary"
 
 export default {
@@ -89,6 +90,7 @@ export default {
     AddTable,
     TableSummary,
     TableInfo,
+    Occupancy
   },
   data() {
     return {
@@ -210,16 +212,16 @@ export default {
     background: #63C3A7;
   }
   .booked {
-    background: rgb(118, 194, 230);
+    background: #79b5d1;
   }
   .taken {
-    background: rgb(211, 8, 75);
+    background: #d3084c;
   }
   .away {
-    background: rgb(255, 209, 82);
+    background: #ffd152;
   }
   .hogging {
-    background: rgb(251, 129, 29);
+    background: #fb811d;
   }
   .legend {
     color: #fff;

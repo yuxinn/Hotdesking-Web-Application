@@ -7,8 +7,6 @@ import { router } from './router/router.js'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
 
-import { ChartPlugin } from "@syncfusion/ej2-vue-charts";
-Vue.use(ChartPlugin);
 Vue.use(Antd)
 
 
