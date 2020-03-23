@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import moment from 'moment'
+import store from './store'
 import axios from 'axios'
 import { router } from './router/router.js'
 
@@ -22,5 +23,6 @@ if (process.env.NODE_ENV === 'production') {
 
 new Vue({
   router,
+  store,
   render: h => h(App),
 }).$mount('#app')

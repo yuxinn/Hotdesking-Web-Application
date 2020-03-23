@@ -2,21 +2,20 @@
   <a-layout id="components-layout-demo-side" style="min-height: 100vh">
   <a-layout-sider collapsible v-model="collapsed">
     <div class="logo"> 
-      <img src="../assets/bee.png" class="logo-img" />
+      <img v-if="collapsed" src="../assets/bee.png" class="logo-img" />
+      <img v-else src="../assets/beepenguin.png" class="logo-img" />
     </div>
     <a-menu @click="handleClick" theme="dark" :defaultSelectedKeys="['dashboard']" mode="inline">
       <a-menu-item key="dashboard">
         <a-icon class="sidebar-icon" type="desktop" />
         <span>Dashboard</span>
       </a-menu-item>
-      <!-- <a-menu-item key="booking">
-        <a-icon class="sidebar-icon" type="file" />
-        <span>Bookings</span>
-      </a-menu-item>
+
       <a-menu-item key="user">
         <a-icon class="sidebar-icon" type="user" />
         <span>User Management</span>
-      </a-menu-item> -->
+      </a-menu-item>
+      
       <a-menu-item key="login" class="mt-5">
         <a-icon class="sidebar-icon" type="poweroff" />
         <span>Log Out</span>
@@ -37,6 +36,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
   export default {
     data() {
       return {
@@ -44,13 +44,12 @@
       };
     },
     methods: {
+      ...mapActions('beeuser', ['logout']),
       handleClick(e) {
         this.selected = e.key
+        if (e.key == 'login') this.logout()
         this.$router.push('/' + this.selected)
       }
-    },
-    watch: {
-
     },
   };
 </script>

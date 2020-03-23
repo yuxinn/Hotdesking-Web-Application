@@ -36,7 +36,7 @@ export default {
     display: block;
     margin-left: auto;
     margin-right: auto;
-    width: 80%;
+    width: 100%;
     height: auto;
   }
 </style>

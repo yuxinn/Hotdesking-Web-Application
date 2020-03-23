@@ -26,10 +26,10 @@
     <AddTable v-if="visibleModal" :visibleModal="visibleModal" @close="closeModal" @submit="submitNew"></AddTable>
     
     <a-row :gutter="16">
-      <a-col class="gutter-row" :span="6">
+      <a-col class="gutter-row" :span="7">
         <div class="gutter-box"><Occupancy v-if="tables" :tables="tables"></Occupancy></div>
       </a-col>
-      <a-col class="gutter-row" :span="18">
+      <a-col class="gutter-row" :span="17">
         <div class="gutter-box" style="background-color: #ececec; padding: 20px;">
           <a-list itemLayout="horizontal" :dataSource="clusters" :loading="firstload">
             <a-list-item slot="renderItem" slot-scope="cluster">
@@ -212,7 +212,7 @@ export default {
     background: #63C3A7;
   }
   .booked {
-    background: #79b5d1;
+    background: #115f83;
   }
   .taken {
     background: #d3084c;

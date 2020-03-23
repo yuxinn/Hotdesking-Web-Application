@@ -1,10 +1,10 @@
 <template>
   <div class="background-image">
     <div class="login-container">
-      <img src="../../assets/logo.png" alt="" height="50%"/>
-      <!-- <a :href="login_url"> -->
-        <img src="../../assets/GoogleButton.png" @click="login" class="loginbtn mx-auto d-block" width="200px" />
-      <!-- </a> -->
+      <img src="../../assets/beepenguin.png" class="mb-3" alt="bee-logo" height="50%"/>
+      <a :href="login_url+':8000/auth/google/login'">
+        <img src="../../assets/GoogleButton.png" @click="login" alt="google-login-btn" class="loginbtn mx-auto d-block" width="200px" />
+      </a>
     </div>
   </div>
 </template>
@@ -13,7 +13,7 @@
 export default {
   data() {
     return {
-      login_url: "http://google.com",
+      login_url: process.env.VUE_APP_API_LOGIN_URL,
       notification: this.$route.params.notification
     };
   },
@@ -22,8 +22,6 @@ export default {
     login() {
       this.$router.push('/dashboard')
     }
-  },
-  mounted() {
   }
 };
 </script>

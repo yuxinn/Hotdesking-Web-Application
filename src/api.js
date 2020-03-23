@@ -1,6 +1,25 @@
 import axios from 'axios'
+import VueJwtDecode from 'vue-jwt-decode'
+import store from './store'
 
 const base_url = process.env.VUE_APP_API_BASE_URL
+const login_url = process.env.VUE_APP_API_LOGIN_URL
+
+axios.defaults.headers.common['X-NTUCBee-Token'] = store.state.beeuser.token
+
+export async function verifyToken(token) {
+  const options = {
+    method: 'post',
+    url: login_url + ':8000/user/verify',
+    data: { token: token },
+  }
+  let response = await axios(options)
+  var user = VueJwtDecode.decode(response.data.token)
+  user.token = token
+
+  store.dispatch('beeuser/login', user)
+  return user
+}
 
 export async function getTables() {
   const options = {
