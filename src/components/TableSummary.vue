@@ -12,7 +12,17 @@
     </div>
 
     <a-row :gutter="16">
-      <a-col :md="24" :lg="12">
+      <a-col :xs="24" :lg="6">
+        <a-card :loading="summaryLoading">
+          <p class="h5 mb-3 text-center">Summary</p>
+          <ejs-accumulationchart id="sumContainer" :tooltip="tooltipPie">
+            <e-accumulation-series-collection>
+              <e-accumulation-series :dataSource='summaryData' xName='x' yName='y' tooltipMappingName='text' :pointColorMapping='pointColorMapping'> </e-accumulation-series>
+            </e-accumulation-series-collection>
+          </ejs-accumulationchart>
+        </a-card>
+      </a-col>
+      <a-col :md="24" :lg="9">
         <a-card :loading="occupancyLoading">
           <p class="h5 mb-3 text-center">Occupancy</p>
           <ejs-chart id="occContainer" :primaryXAxis='primaryXAxis' :tooltip="tooltip" :title="occupancyTitle">
@@ -23,7 +33,7 @@
           </ejs-chart>
         </a-card>
       </a-col>
-      <a-col :xs="24" :lg="12">
+      <a-col :xs="24" :lg="9">
         <a-card :loading="occupancyLoading">
           <p class="h5 mb-3 text-center">Hogging
           <a-dropdown>
@@ -47,17 +57,24 @@
 <script>
 import Vue from "vue";
 import { getTableSummary } from "../api"
-import { ChartPlugin, StackingBarSeries, Category, Tooltip } from "@syncfusion/ej2-vue-charts";
+import { AccumulationChartPlugin, PieSeries, AccumulationTooltip, ChartPlugin, StackingBarSeries, Category, Tooltip } from "@syncfusion/ej2-vue-charts";
 
+Vue.use(AccumulationChartPlugin);
 Vue.use(ChartPlugin);
 
 export default {
   provide: {
-    chart: [StackingBarSeries, Category, Tooltip ]
+    chart: [StackingBarSeries, Category, Tooltip ],
+    accumulationchart: [PieSeries, AccumulationTooltip ],
   },
   props: ['tables', 'clusters'],
   data() {
     return {
+      // summary
+      summaryLoading: true,
+      summaryData: [],
+
+      pointColorMapping: 'fill',
       // occupancy
       occupancyLoading: true,
       occupancyRange: 7,
@@ -67,6 +84,9 @@ export default {
       takenFill: 'rgb(211, 8, 75)',
       primaryXAxis: {
         valueType: 'Category',
+      },
+      tooltipPie: {
+        enable: true, format: '${point.x} : <b>${point.tooltip}%</b>'
       },
       tooltip: { 
         enable: true,
@@ -101,7 +121,7 @@ export default {
         var hogObj = {
           date: key,
           hogged: perSeat ? hoggedHours / totalSeats : hoggedHours,
-          hoggedA: (perSeat ? hoggedHours / totalSeats : hoggedHours.toFixed(2)) + ' hours',
+          hoggedA: (perSeat ? hoggedHours / totalSeats : hoggedHours.toFixed(1)) + ' hours',
         }
         hoggingData.push(hogObj)
       }
@@ -110,18 +130,36 @@ export default {
     },
     async getTableSummary(params) {
       try {
+        this.summaryLoading = true
         this.occupancyLoading = true
         this.hoggingLoading = true
         var resp = await getTableSummary(params)
         this.resp = resp
+        var totalAvail = 0
+        var totalBooked = 0
+        var totalTaken = 0
+        var totalAway = 0
+        var totalHog = 0
         var occupancyData = []
         var occ = 0
         var totalOcc = 0
+        var totalTotal = 0
         for (var key in resp) {
           var total = resp[key]['total']
+          var available = resp[key]['available']
+          var booked = resp[key]['booked']
+          var taken = resp[key]['taken']
+          var away = resp[key]['away']
+          var hogging = resp[key]['hogging']
+          totalTotal += total
+          totalAvail += available
+          totalBooked += booked
+          totalTaken += taken
+          totalAway += away
+          totalHog += hogging
+
           occ += (resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken'])
           totalOcc += total
-          var available = resp[key]['available']
           var apercent = available / total
           var occupied = (resp[key]['hogging'] + resp[key]['away'] + resp[key]['booked'] + resp[key]['taken'])
           var opercent = occupied / total
@@ -134,12 +172,20 @@ export default {
           }
           occupancyData.push(sumObj)
         }
+        this.summaryData = [
+          { x: 'Available', y: totalAvail, fill: '#63c3a7', text: (totalAvail/totalTotal*100).toFixed(2) },
+          { x: 'Booked', y: totalBooked, fill: '#115f83', text: (totalBooked/totalTotal*100).toFixed(2) },
+          { x: 'Taken', y: totalTaken, fill: '#d3084c', text: (totalTaken/totalTotal*100).toFixed(2) },
+          { x: 'Away', y: totalAway, fill: '#ffd152', text: (totalAway/totalTotal*100).toFixed(2) },
+          { x: 'Hogging', y: totalHog, fill: '#fb811d', text: (totalHog/totalTotal*100).toFixed(2) },
+        ]
         this.occupancyData = occupancyData
         this.avgOcc = (totalOcc == 0 ? 0 : occ / totalOcc)
         this.formatHoggingData(resp, false)
       } catch {
         this.$message.error(`Error retrieving past statistics.`);
       } finally {
+        this.summaryLoading = false
         this.occupancyLoading = false
         this.hoggingLoading = false
       }
@@ -155,7 +201,7 @@ export default {
   },
   computed: {
     occupancyTitle() {
-      return this.avgOcc.toFixed(2)*100 + '% of seats occupied'
+      return (this.avgOcc*100).toFixed(0) + '% of seats occupied'
     },
     hoggingTitle() {
       return 'Avg ' + this.totalHog.toFixed(1) + ' hours of daily hogging '
@@ -165,7 +211,7 @@ export default {
 </script>
 
 <style>
-#occContainer, #hogContainer {
+#sumContainer, #occContainer, #hogContainer {
   height: 250px
 }
 </style>
