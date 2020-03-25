@@ -49,6 +49,16 @@ export async function getTableSummary(params) {
   return response.data
 }
 
+export async function getHourlySummary(params) {
+  const options = {
+    method: 'get',
+    params: params,
+    url: base_url + '/api/tablesummary/crowd'
+  }
+  let response = await axios(options)
+  return response.data
+}
+
 export async function createTable(data) {
   const options = {
     method: 'post',

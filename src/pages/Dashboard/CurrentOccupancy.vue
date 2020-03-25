@@ -34,17 +34,18 @@
       </div>
     </div>
 
-    <ejs-accumulationchart id="container">
+    <ejs-accumulationchart id="container"  :tooltip="tooltip">
       <e-accumulation-series-collection>
-        <e-accumulation-series :dataSource='seriesData' xName='x' yName='y' :dataLabel='datalabel' radius='65%' :pointColorMapping=' pointColorMapping'> </e-accumulation-series>
+        <e-accumulation-series :dataSource='seriesData' xName='x' yName='y' tooltipMappingName='hover'  :dataLabel='datalabel' radius='65%' :pointColorMapping=' pointColorMapping'> </e-accumulation-series>
       </e-accumulation-series-collection>
    </ejs-accumulationchart>
+
   </div>
 </template>
 
 <script>
 import Vue from "vue";
-import { AccumulationChartPlugin, PieSeries, AccumulationDataLabel } from "@syncfusion/ej2-vue-charts";
+import { AccumulationChartPlugin, PieSeries, AccumulationDataLabel, AccumulationTooltip } from "@syncfusion/ej2-vue-charts";
 
 Vue.use(AccumulationChartPlugin);
 
@@ -55,9 +56,13 @@ export default {
   data() {
     return {
       seriesData: [],
-                datalabel: { visible: true, name: 'text', position: 'Outside' },
-                enableSmartLabels: false,
-                pointColorMapping: 'fill'
+      datalabel: { visible: true, name: 'text', position: 'Outside' },
+      enableSmartLabels: false,
+      pointColorMapping: 'fill',
+      tooltip: { 
+        enable: true,
+        format: '${point.tooltip}'
+      },
     }
   },
   computed: {
@@ -75,6 +80,20 @@ export default {
       var avail = 0
       for (var cluster of this.clusters) {
         avail += this.tables[cluster].filter((obj) => obj.status === 'available').length;
+      }
+      return avail
+    },
+    numBooked() {
+      var avail = 0
+      for (var cluster of this.clusters) {
+        avail += this.tables[cluster].filter((obj) => obj.status === 'booked').length;
+      }
+      return avail
+    },
+    numAway() {
+      var avail = 0
+      for (var cluster of this.clusters) {
+        avail += this.tables[cluster].filter((obj) => obj.status === 'away').length;
       }
       return avail
     },
@@ -113,16 +132,16 @@ export default {
 
       var total = status.avail + status.booked + status.taken + status.away + status.hogging
 
-      this.seriesData = [ { x: 'Available', y: status.avail, fill: '#63c3a7', text:'Avail ' + Math.round((status.avail/total)*100,2) + '%' },
-                          { x: 'Booked', y: status.booked, fill: '#115f83', text:'Booked '  + Math.round((status.booked/total)*100,2) + '%' },
-                          { x: 'Taken', y: status.taken, fill: '#d3084c', text:'Taken '  + Math.round((status.taken/total)*100,2) + '%' },
-                          { x: 'Away', y: status.away, fill: '#ffd152', text:'Away ' + Math.round((status.away/total)*100,2) + '%' },
-                          { x: 'Hogging', y: status.hogging, fill: '#fb811d', text:'Hogging ' + Math.round((status.hogging/total)*100,2) + '%' },
+      this.seriesData = [ { x: 'Available', y: status.avail, fill: '#63c3a7', text:'Avail ' + Math.round((status.avail/total)*100,2) + '%', hover: this.numAvailable },
+                          { x: 'Booked', y: status.booked, fill: '#115f83', text:'Booked '  + Math.round((status.booked/total)*100,2) + '%', hover: this.numBooked },
+                          { x: 'Taken', y: status.taken, fill: '#d3084c', text:'Taken '  + Math.round((status.taken/total)*100,2) + '%', hover: this.numTaken },
+                          { x: 'Away', y: status.away, fill: '#ffd152', text:'Away ' + Math.round((status.away/total)*100,2) + '%', hover: this.numAway },
+                          { x: 'Hogging', y: status.hogging, fill: '#fb811d', text:'Hogging ' + Math.round((status.hogging/total)*100,2) + '%', hover: this.numHogging },
                         ]
     }
   },
   provide: {
-    accumulationchart: [PieSeries, AccumulationDataLabel]
+    accumulationchart: [PieSeries, AccumulationDataLabel, AccumulationTooltip],
   }
 }
 </script>
