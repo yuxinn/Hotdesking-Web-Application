@@ -3,7 +3,7 @@
     <a-modal title="Table Details" v-model="visible" @cancel="handleClose" @ok="handleBook">
       <template slot="footer">
         <a-button key="back" @click="handleClose">Close</a-button>
-        <a-button v-if="status==='available'" key="submit" type="primary" @click="handleBook">
+        <a-button :key="currentStatus" v-if="currentStatus==='available'" type="primary" @click="handleBook">
           Book
         </a-button>
       </template>
@@ -15,7 +15,8 @@
             <p class="h6 text-center d-inline" style="vertical-align: 3px">
               {{tableId.toUpperCase()}}
             </p>
-            <div :class="'ml-2 circle ' + table.status"></div>
+            <Status :key="currentStatus" :status="currentStatus"></Status>
+            <!-- <div :class="'ml-2 circle ' + status"></div> -->
           </div>
         </a-col>
         <a-col class="gutter-row" :span="16">
@@ -39,6 +40,8 @@
 </template>
 
 <script>
+import Status from '../../components/Status'
+
 export default {
   props: {
     showTableInfo: Boolean,
@@ -46,9 +49,13 @@ export default {
     allSensors: Object,
     bookTable: Function,
   },
+  components: {
+    Status
+  },
   data() {
     return {
-      visible: this.showTableInfo
+      visible: this.showTableInfo,
+      currentStatus: this.table.status
     }
   },
   computed: {
@@ -65,6 +72,11 @@ export default {
       return this.table.status
     }
   },
+  watch: {
+    table(val) {
+      this.currentStatus = val.status
+    }
+  },
   methods: {
     handleBook() {
       this.$confirm({
@@ -77,6 +89,7 @@ export default {
           try {
             await this.bookTable(this.cluster, this.tableId)
             this.table.status = 'booked'
+            this.currentStatus = 'booked'
           } catch(err) {
             console.error(err)
           }
@@ -103,7 +116,7 @@ export default {
     background: #63C3A7;
   }
   .booked {
-    background: rgb(118, 194, 230);
+    background: #115f83;
   }
   .taken {
     background: rgb(211, 8, 75);
