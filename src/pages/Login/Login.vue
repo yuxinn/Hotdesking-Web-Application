@@ -31,7 +31,7 @@ export default {
   cursor: pointer;
 }
 .background-image {
-  background: url("../../assets/login-bg.png");
+  background: url("../../assets/login-bg.jpg");
   position: absolute;
   background-size: cover;
   height: 100%;

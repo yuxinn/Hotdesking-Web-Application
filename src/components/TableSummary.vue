@@ -153,7 +153,7 @@ export default {
         hogObj = {
           date: dateAll,
           hogged: hoggedHours,
-          hoggedA: hoggedHours.toFixed(1) + ' hours',
+          hoggedA: hoggedHours.toFixed(1) + ' mins',
         }
         hoggingData.push(hogObj)
       }
@@ -273,7 +273,7 @@ export default {
       return (this.avgOcc*100).toFixed(0) + '% of seats occupied'
     },
     hoggingTitle() {
-      return 'Avg ' + this.totalHog.toFixed(1) + ' hours of daily hogging '
+      return 'Avg ' + this.totalHog.toFixed(1) + ' mins of daily hogging '
     },
   }
 };

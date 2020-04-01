@@ -11,7 +11,7 @@
       <a-row :gutter="16">
         <a-col class="gutter-row mt-3" :span="8">
           <img src="../../assets/desk.png" alt="Table" class="center mb-1">
-          <div class="d-flex justify-content-center">
+          <div class="d-flex justify-content-center mt-2">
             <p class="h6 text-center d-inline" style="vertical-align: 3px">
               {{tableId.toUpperCase()}}
             </p>
@@ -137,7 +137,8 @@ export default {
     display: block;
     margin-left: auto;
     margin-right: auto;
-    width: 40%;
+    width: 80%;
+    margin-bottom: 10px;
 }
 
 </style>
