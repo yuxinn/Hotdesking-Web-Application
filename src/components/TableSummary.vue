@@ -63,9 +63,9 @@
       <a-col :md="24" :lg="24">
         <a-card :loading="hourlyLoading" :bordered="false">
           <p class="h5 mb-3 text-center">Busy Hours</p>
-          <ejs-chart id="popularContainer" :primaryXAxis='primaryXAxis' :tooltip="tooltip">
+          <ejs-chart id="popularContainer" :primaryXAxis='primaryXAxis' :primaryYAxis='primaryYAxis' :tooltip="tooltip">
             <e-series-collection>
-              <e-series :dataSource='popularData' type='Column' xName='time' yName='occupied' tooltipMappingName='occupied' name='occupied' :pointColorMapping='pointColorMapping' :fill='miscFill'> </e-series>
+              <e-series :dataSource='popularData' type='Column' xName='time' yName='occupied' tooltipMappingName='text' name='occupied' :pointColorMapping='pointColorMapping' :fill='miscFill'> </e-series>
             </e-series-collection>
           </ejs-chart>
         </a-card>
@@ -110,6 +110,9 @@ export default {
       // takenFill: 'rgb(211, 8, 75)',
       primaryXAxis: {
         valueType: 'Category',
+      },
+      primaryYAxis: {
+        labelFormat: '{value}%'
       },
       tooltipPie: {
         enable: true,
@@ -211,6 +214,7 @@ export default {
     async getTableSummary(params) {
       try {
         this.graphsLoading = true
+        this.hogLoading = true
         var resp = await getTableSummary(params)
         this.tableOptions = Object.keys(resp)
         this.resp = resp
@@ -220,6 +224,7 @@ export default {
         this.$message.error(`Error retrieving past table data.`);
       } finally {
         this.graphsLoading = false
+        this.hogLoading = false
       }
     },
     async getHourlySummary() {
@@ -229,11 +234,19 @@ export default {
         var popularData = []
         Object.keys(resp).forEach((key) => {
           var hourData = resp[key]
-          popularData.push({
-            time: (key.length > 1 ? key : '0' + key) + ':00',
-            occupied: hourData['total'] - hourData['available'],
-            text: key
-          })
+          if (key >=9 && key <= 21) {
+            var total = hourData['total']
+            var occupied = 0
+            if (total) {
+              occupied = (total - hourData['available']) / total * 100
+            }
+            popularData.push({
+              time: (key.length > 1 ? key : '0' + key) + ':00',
+              occupied: occupied,
+              text: occupied.toFixed(2) + '%'
+            })
+          }
+          
         })
         this.popularData = popularData
       } catch {
