@@ -5,7 +5,7 @@
       <img v-if="collapsed" src="../assets/bee.png" class="logo-img" />
       <img v-else src="../assets/logo.png" class="logo-img" />
     </div>
-    <a-menu @click="handleClick" theme="dark" :defaultSelectedKeys="['dashboard']" mode="inline">
+    <a-menu @click="handleClick" theme="dark" :defaultSelectedKeys="[currentRouteName]" mode="inline">
       <a-menu-item key="dashboard">
         <a-icon class="sidebar-icon" type="desktop" />
         <span>Dashboard</span>
@@ -29,7 +29,7 @@
       </div>
     </a-layout-content>
     <a-layout-footer style="text-align: center">
-      I-oT? ©2020
+      I-oT? ©2020 {{selected}}
     </a-layout-footer>
   </a-layout>
 </a-layout>
@@ -43,6 +43,11 @@ import { mapActions } from 'vuex'
         collapsed: false,
         selected: '',
       };
+    },
+    computed: {
+      currentRouteName() {
+        return this.$route.name || 'dashboard';
+      },
     },
     methods: {
       ...mapActions('beeuser', ['logout']),

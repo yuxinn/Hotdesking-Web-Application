@@ -1,5 +1,6 @@
 <template>
   <div class="UserTable">
+    {{searchText}}
     <a-table
       class="mt-3"
       :columns="columns"
@@ -56,6 +57,39 @@
         </template>
       </template>
 
+      <div
+        slot="filterDropdown"
+        slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+        style="padding: 8px"
+      >
+        <a-input
+          v-ant-ref="c => searchInput = c"
+          :placeholder="`Search ${column.dataIndex}`"
+          :value="selectedKeys[0]"
+          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @pressEnter="() => handleSearch(selectedKeys, confirm)"
+          style="width: 188px; margin-bottom: 8px; display: block;"
+        />
+        <a-button
+          type="primary"
+          @click="() => handleSearch(selectedKeys, confirm)"
+          icon="search"
+          size="small"
+          style="width: 90px; margin-right: 8px">Search</a-button
+        >
+        <a-button @click="() => handleReset(clearFilters)" size="small" style="width: 90px">
+          Reset
+        </a-button>
+      </div>
+
+      <!-- Search Icon -->
+      <a-icon
+        slot="filterIcon"
+        slot-scope="filtered"
+        type="search"
+        :style="{ color: filtered ? '#108ee9' : undefined }"
+      />
+
     </a-table>
   </div>
 </template>
@@ -89,10 +123,14 @@ export default {
         {
           title: "Department",
           dataIndex: "department",
+          defaultSortOrder: 'ascend',
           sorter: (a, b) => a.department.localeCompare(b.department),
           scopedSlots: {
             customRender: 'department',
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
           },
+          onFilter: (value, record) => record.department.toLowerCase().includes(value.toLowerCase()),
           width: "15%",
         },
         {
@@ -101,6 +139,8 @@ export default {
           sorter: (a, b) => a.title.localeCompare(b.title),
           scopedSlots: {
             customRender: 'jobtitle',
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
           },
           width: "20%",
         },
@@ -110,13 +150,21 @@ export default {
           sorter: (a, b) => a.name.localeCompare(b.name),
           scopedSlots: {
             customRender: 'name',
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
           },
+          onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()),
           width: "20%",
         },
         {
           title: "Email",
           dataIndex: "email",
+          scopedSlots: {
+            filterDropdown: 'filterDropdown',
+            filterIcon: 'filterIcon',
+          },
           sorter: (a, b) => a.email.localeCompare(b.email),
+          onFilter: (value, record) => record.email.toLowerCase().includes(value.toLowerCase()),
           width: "20%",
         },
         {
@@ -204,7 +252,16 @@ export default {
       } catch(err) {
         console.error(err)
       }
-    }
+    },
+    handleSearch(selectedKeys, confirm) {
+      confirm();
+      console.log(selectedKeys)
+      this.searchText = selectedKeys[0];
+    },
+    handleReset(clearFilters) {
+      clearFilters();
+      this.searchText = '';
+    },
   }
 }
 </script>
