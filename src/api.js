@@ -21,6 +21,45 @@ export async function verifyToken(token) {
   return user
 }
 
+export async function addUser(data) {
+  const options = {
+    method: 'post',
+    url: login_url + ':8000/user',
+    data: data
+  }
+  let response = await axios(options)
+  return response.data
+}
+
+export async function getUsers() {
+  const options = {
+    method: 'get',
+    url: login_url + ':8000/user/all',
+  }
+  let response = await axios(options)
+  return response.data
+}
+
+export async function deleteUser(data) {
+  const options = {
+    method: 'delete',
+    url: login_url + ':8000/user',
+    data: data
+  }
+  let response = await axios(options)
+  return response.data
+}
+
+export async function updateUser(data) {
+  const options = {
+    method: 'put',
+    url: login_url + ':8000/user',
+    data: data
+  }
+  let response = await axios(options)
+  return response.data
+}
+
 export async function getTables() {
   const options = {
     method: 'get',

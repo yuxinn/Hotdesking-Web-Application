@@ -1,6 +1,10 @@
 <template>
   <div class="CurrentOccupancy">
-    <div class="row">
+    <a-radio-group v-model="view">
+      <a-radio-button value="chart">Chart</a-radio-button>
+      <a-radio-button value="numbers">Numbers</a-radio-button>
+    </a-radio-group>
+    <div class="row mt-2" v-if="view=='numbers'">
       <div class="col-6 mb-1">
         <a-statistic :value="numAvailable">
           <template v-slot:title>
@@ -34,7 +38,7 @@
       </div>
     </div>
 
-    <ejs-accumulationchart id="container"  :tooltip="tooltip">
+    <ejs-accumulationchart v-else id="container"  :tooltip="tooltip">
       <e-accumulation-series-collection>
         <e-accumulation-series :dataSource='seriesData' xName='x' yName='y' tooltipMappingName='hover'  :dataLabel='datalabel' radius='65%' :pointColorMapping=' pointColorMapping'> </e-accumulation-series>
       </e-accumulation-series-collection>
@@ -55,6 +59,7 @@ export default {
   },
   data() {
     return {
+      view: 'chart',
       seriesData: [],
       datalabel: { visible: true, name: 'text', position: 'Outside' },
       enableSmartLabels: false,
@@ -132,11 +137,11 @@ export default {
 
       var total = status.avail + status.booked + status.taken + status.away + status.hogging
 
-      this.seriesData = [ { x: 'Available', y: status.avail, fill: '#63c3a7', text:'Avail ' + Math.round((status.avail/total)*100,2) + '%', hover: this.numAvailable },
-                          { x: 'Booked', y: status.booked, fill: '#115f83', text:'Booked '  + Math.round((status.booked/total)*100,2) + '%', hover: this.numBooked },
-                          { x: 'Taken', y: status.taken, fill: '#d3084c', text:'Taken '  + Math.round((status.taken/total)*100,2) + '%', hover: this.numTaken },
-                          { x: 'Away', y: status.away, fill: '#ffd152', text:'Away ' + Math.round((status.away/total)*100,2) + '%', hover: this.numAway },
-                          { x: 'Hogging', y: status.hogging, fill: '#fb811d', text:'Hogging ' + Math.round((status.hogging/total)*100,2) + '%', hover: this.numHogging },
+      this.seriesData = [ { x: 'Available', y: status.avail, fill: '#63c3a7', text:'Avail ' + Math.round((status.avail/total)*100,2) + '%', hover: 'Available: ' + this.numAvailable },
+                          { x: 'Booked', y: status.booked, fill: '#115f83', text:'Booked '  + Math.round((status.booked/total)*100,2) + '%', hover: 'Booked: ' + this.numBooked },
+                          { x: 'Taken', y: status.taken, fill: '#d3084c', text:'Taken '  + Math.round((status.taken/total)*100,2) + '%', hover: 'Taken: ' + this.numTaken },
+                          { x: 'Away', y: status.away, fill: '#ffd152', text:'Away ' + Math.round((status.away/total)*100,2) + '%', hover: 'Away: ' + this.numAway },
+                          { x: 'Hogging', y: status.hogging, fill: '#fb811d', text:'Hogging ' + Math.round((status.hogging/total)*100,2) + '%', hover: 'Hoging: ' + this.numHogging },
                         ]
     }
   },

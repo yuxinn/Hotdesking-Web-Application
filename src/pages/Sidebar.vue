@@ -3,7 +3,7 @@
   <a-layout-sider collapsible v-model="collapsed">
     <div class="logo"> 
       <img v-if="collapsed" src="../assets/bee.png" class="logo-img" />
-      <img v-else src="../assets/beepenguin.png" class="logo-img" />
+      <img v-else src="../assets/logo.png" class="logo-img" />
     </div>
     <a-menu @click="handleClick" theme="dark" :defaultSelectedKeys="['dashboard']" mode="inline">
       <a-menu-item key="dashboard">
@@ -41,6 +41,7 @@ import { mapActions } from 'vuex'
     data() {
       return {
         collapsed: false,
+        selected: '',
       };
     },
     methods: {

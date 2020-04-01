@@ -117,6 +117,9 @@ export default {
       this.getTables()
     }, 10000);
   },
+  beforeDestroy() {
+    clearInterval(this.interval)
+  },
   methods: {
     async getTables() {
       try {

@@ -4,6 +4,7 @@ import Router from 'vue-router';
 import Login from '../pages/Login/Login'
 import Dashboard from '../pages/Dashboard/Dashboard'
 import Authentication from '../pages/Login/Authentication'
+import User from '../pages/User/User'
 
 
 Vue.use(Router);
@@ -15,7 +16,8 @@ export const router = new Router({
     { path: '/login', component: Login, name: 'login' },
     { path: '/dashboard', component: Dashboard, name: 'dashboard' },
     { path: '/redirect', component: Authentication, name: 'authentication' },
-    { path: '/login', component: Login },
+    { path: '/user', component: User, name: 'user' },
+    { path: '/', component: Login, name: "LOGIN" },
     
   ]
 });

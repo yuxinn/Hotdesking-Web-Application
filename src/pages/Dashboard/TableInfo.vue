@@ -15,7 +15,7 @@
             <p class="h6 text-center d-inline" style="vertical-align: 3px">
               {{tableId.toUpperCase()}}
             </p>
-            <div :class="'ml-2 circle ' + status"></div>
+            <div :class="'ml-2 circle ' + table.status"></div>
           </div>
         </a-col>
         <a-col class="gutter-row" :span="16">
