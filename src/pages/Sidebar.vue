@@ -29,7 +29,7 @@
       </div>
     </a-layout-content>
     <a-layout-footer style="text-align: center">
-      I-oT? ©2020 {{selected}}
+      I-oT? ©2020
     </a-layout-footer>
   </a-layout>
 </a-layout>
