@@ -28,8 +28,10 @@
               <p class="floating">{{sensor.name}}:</p> 
             </a-col>
             <a-col class="gutter-row" :span="15">
-              <div :class="sensor.lastUpdate>120?'circle na':'circle available'"></div> 
-              <small class="ml-1" style="vertical-align: 3px"> Last update {{sensor.lastUpdate}} mins ago</small>
+              <div class="circle available"></div> 
+              <small class="ml-1" style="vertical-align: 3px"> Last update 0 mins ago</small>
+              <!-- <div :class="sensor.lastUpdate>120?'circle na':'circle available'"></div> 
+              <small class="ml-1" style="vertical-align: 3px"> Last update {{sensor.lastUpdate}} mins ago</small> -->
             </a-col>
           </a-row>
         </a-col>
