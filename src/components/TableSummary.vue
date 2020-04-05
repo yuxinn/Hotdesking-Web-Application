@@ -60,6 +60,22 @@
           </ejs-chart>
         </a-card>
       </a-col>
+    </a-row>
+
+    <a-row :gutter="16">
+      <a-divider></a-divider>
+      <div class="d-flex justify-content-center">
+        <a-radio-group v-model="day">
+          <a-radio-button value="Weekdays">Weekdays</a-radio-button>
+          <a-radio-button value="Monday">Monday</a-radio-button>
+          <a-radio-button value="Tuesday">Tuesday</a-radio-button>
+          <a-radio-button value="Wednesday">Wednesday</a-radio-button>
+          <a-radio-button value="Thursday">Thursday</a-radio-button>
+          <a-radio-button value="Friday">Friday</a-radio-button>
+        </a-radio-group>
+      </div>
+    </a-row>
+    <a-row :gutter="16">
       <a-col :md="24" :lg="24">
         <a-card :loading="hourlyLoading" :bordered="false">
           <p class="h5 mb-3 text-center">Busy Hours</p>
@@ -91,6 +107,8 @@ export default {
   props: ['tables', 'clusters'],
   data() {
     return {
+      day: 'Weekdays',
+
       graphsLoading: true,
       hourlyLoading: true,
       hogLoading: true,
