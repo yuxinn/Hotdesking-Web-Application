@@ -65,7 +65,7 @@
     <a-row :gutter="16">
       <a-divider></a-divider>
       <div class="d-flex justify-content-center">
-        <a-radio-group v-model="day">
+        <a-radio-group v-model="day" @change="getHourlySummary">
           <a-radio-button value="Weekdays">Weekdays</a-radio-button>
           <a-radio-button value="Monday">Monday</a-radio-button>
           <a-radio-button value="Tuesday">Tuesday</a-radio-button>
@@ -246,10 +246,12 @@ export default {
       }
     },
     async getHourlySummary() {
+      var day = this.day=='Weekdays' ? 'Friday' : this.day
       try {
         this.hourlyLoading = true
         var resp = await getHourlySummary()
         var popularData = []
+        resp = resp[day]
         Object.keys(resp).forEach((key) => {
           var hourData = resp[key]
           if (key >=9 && key <= 21) {

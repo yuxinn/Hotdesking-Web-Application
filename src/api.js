@@ -92,7 +92,7 @@ export async function getHourlySummary(params) {
   const options = {
     method: 'get',
     params: params,
-    url: base_url + '/api/tablesummary/crowd'
+    url: base_url + '/api/tablesummary/crowd/day'
   }
   let response = await axios(options)
   return response.data
